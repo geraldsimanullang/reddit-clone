@@ -1,4 +1,5 @@
-const { hashPassword } = require("../helpers/bcryptjs");
+const { hashPassword, comparePassword } = require("../helpers/bcryptjs");
+const { signToken } = require("../helpers/jsonwebtoken");
 const { GraphQLError } = require("graphql");
 
 const userTypeDefs = `#graphql
@@ -16,12 +17,18 @@ const userTypeDefs = `#graphql
     password: String!
   }
 
+  input LoginInput {
+    username: String!
+    password: String!
+  }
+
   type Query {
     users: [User]
   }
 
   type Mutation {
     register(input: RegisterInput): RegisterResponse
+    login(input: LoginInput) : LoginResponse
   }
 `;
 
@@ -58,9 +65,7 @@ const userResolvers = {
         }
 
         // Unique email validation
-        const findUserByEmail = await db
-          .collection("Users")
-          .findOne({ email });
+        const findUserByEmail = await db.collection("Users").findOne({ email });
 
         if (findUserByEmail) {
           throw new GraphQLError("Email has already been taken", {
@@ -74,23 +79,23 @@ const userResolvers = {
         const validateEmailFormat = (email) => {
           const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
           return re.test(String(email).toLowerCase());
-        }
+        };
 
         if (!validateEmailFormat(email)) {
           throw new GraphQLError("Invalid email format", {
             extensions: {
-              statusCode: 400
-            }
-          })
+              statusCode: 400,
+            },
+          });
         }
 
         // Password length validation
         if (password.length < 5) {
           throw new GraphQLError("Password must at least has 5 characters", {
             extensions: {
-              statusCode: 400
-            }
-          })
+              statusCode: 400,
+            },
+          });
         }
 
         // Passed all validation
@@ -110,7 +115,51 @@ const userResolvers = {
       } catch (error) {
         return {
           statusCode: error.extensions.statusCode,
-          message: error.message,
+          error: error.message,
+        };
+      }
+    },
+
+    login: async (_, args, context) => {
+      try {
+        const { db } = context;
+        const { username, password } = args.input;
+
+        const user = await db.collection("Users").findOne({ username });
+
+        if (!user) {
+          throw new GraphQLError("Invalid Username or Password", {
+            extensions: {
+              statusCode: 401,
+            },
+          });
+        }
+
+        if (!comparePassword(password, user.password)) {
+          throw new GraphQLError("Invalid Username or Password", {
+            extensions: {
+              statusCode: 401,
+            },
+          });
+        }
+
+        const payload = {
+          userId: user["_id"],
+          username: user.username,
+          email: user.email
+        };
+
+        const access_token = signToken(payload)
+
+        return {
+          statusCode: 200,
+          message: "Login Success",
+          access_token
+        }
+      } catch (error) {
+        return {
+          statusCode: error.extensions.statusCode,
+          error: error.message,
         };
       }
     },
