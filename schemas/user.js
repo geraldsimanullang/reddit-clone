@@ -10,6 +10,10 @@ const userTypeDefs = `#graphql
     email: String!
   }
 
+  input SearchUserInput {
+    keyword: String!
+  }
+
   input RegisterInput {
     name: String
     username: String!
@@ -23,7 +27,7 @@ const userTypeDefs = `#graphql
   }
 
   type Query {
-    users: [User]
+    searchUsers(input: SearchUserInput): [User]
   }
 
   type Mutation {
@@ -34,11 +38,21 @@ const userTypeDefs = `#graphql
 
 const userResolvers = {
   Query: {
-    users: async (_, __, context) => {
+    searchUsers: async (_, args, context) => {
       try {
         const { db } = context;
-        const users = await db.collection("Users").find({}).toArray();
-        return users;
+        const { keyword } = args.input;
+        const query = {
+          $or: [
+            { name: { $regex: new RegExp(keyword, "i") } },
+            { username: { $regex: new RegExp(keyword, "i") } },
+          ],
+        };
+
+        const users = await db.collection("Users").find(query).toArray()
+
+        return users
+
       } catch (error) {
         console.log(error);
       }
@@ -145,17 +159,18 @@ const userResolvers = {
 
         const payload = {
           userId: user["_id"],
+          name: user.name,
           username: user.username,
-          email: user.email
+          email: user.email,
         };
 
-        const access_token = signToken(payload)
+        const access_token = signToken(payload);
 
         return {
           statusCode: 200,
           message: "Login Success",
-          access_token
-        }
+          access_token,
+        };
       } catch (error) {
         return {
           statusCode: error.extensions.statusCode,
