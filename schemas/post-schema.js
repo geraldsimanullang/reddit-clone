@@ -37,13 +37,18 @@ const postTypeDefs = `#graphql
     content: String!
   }
 
+  input LikeInput {
+    postId: ID!
+  }
+
   type Query {
     getPosts: [Post]
   }
 
   type Mutation {
     addPost(input: AddPostInput): Post
-    comment(input: CommentInput): String
+    commentPost(input: CommentInput): String
+    likePost(input: LikeInput): String
   }
 
 `;
@@ -93,7 +98,7 @@ const postResolvers = {
       }
     },
 
-    comment: async (_, args, context) => {
+    commentPost: async (_, args, context) => {
       try {
         const userInfo = await context.authenticate()
         const { db } = context
@@ -114,6 +119,32 @@ const postResolvers = {
 
         return "Comment success"
 
+
+      } catch (error) {
+        throw error
+      }
+    },
+
+    likePost: async (_, args, context) => {
+      try {
+        const userInfo = await context.authenticate();
+        const { db } = context;
+
+        const { postId } = args.input;
+
+        await db.collection("Posts").updateOne({
+          _id : new ObjectId(postId)
+        }, {
+          $push: {
+            likes: {
+              username: userInfo.username,
+              createdAt: new Date(),
+              updatedAt: new Date()
+            }
+          }
+        })
+
+        return "Like success"
 
       } catch (error) {
         throw error
