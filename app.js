@@ -4,6 +4,7 @@ if (process.env.NODE_ENV !== "production") {
 
 const { ApolloServer } = require("@apollo/server");
 const { startStandaloneServer } = require("@apollo/server/standalone");
+const { GraphQLError } = require("graphql");
 
 const { responseTypeDefs } = require("./schemas/response");
 const { userTypeDefs, userResolvers } = require("./schemas/user");
@@ -25,7 +26,32 @@ const server = new ApolloServer({
     listen: 4000,
 
     context: async ({ req, res }) => {
-      return { db };
+      return {
+        authentication: async () => {
+          try {
+            const { authorization } = req.headers;
+
+            if (!authorization) {
+              throw new GraphQLError("Unauthorized");
+            }
+
+            const access_token = authorization.split(" ")[1]
+
+            if (!access_token) {
+              throw new GraphQLError("Invalid Token")
+            }
+
+            const { verifyToken } = require("./helpers/jsonwebtoken");
+            const payload = verifyToken(authorization);
+
+         
+
+          } catch (error) {
+            throw error
+          }
+        },
+        db,
+      };
     },
   });
 

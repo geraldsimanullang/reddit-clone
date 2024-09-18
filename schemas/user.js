@@ -49,12 +49,11 @@ const userResolvers = {
           ],
         };
 
-        const users = await db.collection("Users").find(query).toArray()
+        const users = await db.collection("Users").find(query).toArray();
 
-        return users
-
+        return users;
       } catch (error) {
-        console.log(error);
+        throw error;
       }
     },
   },
@@ -73,7 +72,7 @@ const userResolvers = {
         if (findUserByUsername) {
           throw new GraphQLError("Username has already been taken", {
             extensions: {
-              statusCode: 400,
+              http: { status: 400 },
             },
           });
         }
@@ -82,9 +81,9 @@ const userResolvers = {
         const findUserByEmail = await db.collection("Users").findOne({ email });
 
         if (findUserByEmail) {
-          throw new GraphQLError("Email has already been taken", {
+          throw new GraphQLError("Email has already been registered", {
             extensions: {
-              statusCode: 400,
+              http: { status: 400 },
             },
           });
         }
@@ -98,7 +97,7 @@ const userResolvers = {
         if (!validateEmailFormat(email)) {
           throw new GraphQLError("Invalid email format", {
             extensions: {
-              statusCode: 400,
+              http: { status: 400 },
             },
           });
         }
@@ -107,7 +106,7 @@ const userResolvers = {
         if (password.length < 5) {
           throw new GraphQLError("Password must at least has 5 characters", {
             extensions: {
-              statusCode: 400,
+              http: { status: 400 },
             },
           });
         }
@@ -127,10 +126,7 @@ const userResolvers = {
           message: "Register success",
         };
       } catch (error) {
-        return {
-          statusCode: error.extensions.statusCode,
-          error: error.message,
-        };
+        throw error
       }
     },
 
@@ -144,7 +140,7 @@ const userResolvers = {
         if (!user) {
           throw new GraphQLError("Invalid Username or Password", {
             extensions: {
-              statusCode: 401,
+              http: { status: 401 },
             },
           });
         }
@@ -152,7 +148,7 @@ const userResolvers = {
         if (!comparePassword(password, user.password)) {
           throw new GraphQLError("Invalid Username or Password", {
             extensions: {
-              statusCode: 401,
+              http: { status: 401 },
             },
           });
         }
@@ -172,10 +168,7 @@ const userResolvers = {
           access_token,
         };
       } catch (error) {
-        return {
-          statusCode: error.extensions.statusCode,
-          error: error.message,
-        };
+        throw error;
       }
     },
   },
