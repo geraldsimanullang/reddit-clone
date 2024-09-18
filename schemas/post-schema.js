@@ -58,7 +58,21 @@ const postResolvers = {
     getPosts: async (_, __, context) => {
       try {
         const { db } = context;
-        const posts = await db.collection("Posts").find({}).toArray();
+
+        const query = [{
+          $lookup: {
+            from: "Users",
+            localField: "authorId",
+            foreignField: "_id",
+            as: "Author"
+          }
+        }, {
+          $project: {
+            
+          }
+        }]
+
+        const posts = await db.collection("Posts").aggregate(query).toArray();
 
         return posts;
       } catch (error) {

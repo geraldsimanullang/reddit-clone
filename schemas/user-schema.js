@@ -44,8 +44,8 @@ const userResolvers = {
         const { keyword } = args.input;
         const query = {
           $or: [
-            { name: { $regex: new RegExp(keyword, "i") } },
-            { username: { $regex: new RegExp(keyword, "i") } },
+            { name: { $regex: keyword, $options: "i" } },
+            { username: { $regex: keyword, $options: "i" } },
           ],
         };
 
