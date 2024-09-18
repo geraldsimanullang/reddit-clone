@@ -7,15 +7,15 @@ const { startStandaloneServer } = require("@apollo/server/standalone");
 const { GraphQLError } = require("graphql");
 
 const { responseTypeDefs } = require("./schemas/response");
-const { userTypeDefs, userResolvers } = require("./schemas/user");
+const { userTypeDefs, userResolvers } = require("./schemas/user-schema");
 // const { followTypeDefs, followResolvers } = require("./schemas/follow");
-// const { postTypeDefs, postResolvers } = require("./schemas/post");
+const { postTypeDefs, postResolvers } = require("./schemas/post-schema");
 
 const { connect, getDB } = require("./config/mongodb-connection");
 
 const server = new ApolloServer({
-  typeDefs: [responseTypeDefs, userTypeDefs],
-  resolvers: [userResolvers],
+  typeDefs: [responseTypeDefs, userTypeDefs, postTypeDefs],
+  resolvers: [userResolvers, postResolvers],
 });
 
 (async () => {
@@ -27,12 +27,12 @@ const server = new ApolloServer({
 
     context: async ({ req, res }) => {
       return {
-        authentication: async () => {
+        authenticate: async () => {
           try {
             const { authorization } = req.headers;
 
             if (!authorization) {
-              throw new GraphQLError("Unauthorized");
+              throw new GraphQLError("Unauthenticated");
             }
 
             const access_token = authorization.split(" ")[1]
@@ -42,9 +42,23 @@ const server = new ApolloServer({
             }
 
             const { verifyToken } = require("./helpers/jsonwebtoken");
-            const payload = verifyToken(authorization);
+            const payload = verifyToken(access_token);
 
-         
+            const { ObjectId } = require("mongodb");
+            const _id = new ObjectId(payload.userId);
+
+            const user = await db.collection("Users").findOne({_id})
+
+            if (!user) {
+              throw new GraphQLError("Unauthenticated")
+            }
+
+            return {
+              userId: user["_id"],
+              name: user.name,
+              username: user.username,
+              email: user.email
+            }
 
           } catch (error) {
             throw error
