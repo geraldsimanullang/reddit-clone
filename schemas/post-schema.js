@@ -32,12 +32,18 @@ const postTypeDefs = `#graphql
     tags: [String]
   }
 
+  input CommentInput {
+    postId: ID!
+    content: String!
+  }
+
   type Query {
     getPosts: [Post]
   }
 
   type Mutation {
     addPost(input: AddPostInput): Post
+    comment(input: CommentInput): String
   }
 
 `;
@@ -59,7 +65,7 @@ const postResolvers = {
   Mutation: {
     addPost: async (_, args, context) => {
       try {
-        const userInfo = context.authenticate();
+        const userInfo = await context.authenticate();
         const { db } = context;
 
         const { content, imgUrl, tags } = args.input;
@@ -76,7 +82,7 @@ const postResolvers = {
         };
 
         const addPostReport = await db.collection("Posts").insertOne(postInput);
-        
+
         const newPost = await db
           .collection("Posts")
           .findOne({ _id: addPostReport.insertedId });
@@ -86,6 +92,33 @@ const postResolvers = {
         throw error;
       }
     },
+
+    comment: async (_, args, context) => {
+      try {
+        const userInfo = await context.authenticate()
+        const { db } = context
+        const { postId, content } = args.input
+
+        await db.collection("Posts").updateOne({
+          _id : new ObjectId(postId)
+        }, {
+          $push: {
+            comments: {
+              content,
+              username: userInfo.username,
+              createdAt: new Date(),
+              updatedAt: new Date()
+            }
+          }
+        })
+
+        return "Comment success"
+
+
+      } catch (error) {
+        throw error
+      }
+    }
   },
 };
 
