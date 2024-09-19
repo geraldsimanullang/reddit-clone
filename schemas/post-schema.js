@@ -22,8 +22,9 @@ const postTypeDefs = `#graphql
     tags: [String]
     comments: [Comment]
     likes: [Like]
-    creataedAt: String
+    createdAt: String
     updatedAt: String
+    Author: User
   }
 
   input AddPostInput {
@@ -59,18 +60,32 @@ const postResolvers = {
       try {
         const { db } = context;
 
-        const query = [{
-          $lookup: {
-            from: "Users",
-            localField: "authorId",
-            foreignField: "_id",
-            as: "Author"
-          }
-        }, {
-          $project: {
-            
-          }
-        }]
+        const query = [
+          {
+            $lookup: {
+              from: "Users",
+              localField: "authorId",
+              foreignField: "_id",
+              as: "Author",
+            },
+          },
+          {
+            $project: {
+              "author.password": 0,
+            },
+          },
+          {
+            $sort: {
+              createdAt: -1,
+            },
+          },
+          {
+            $unwind: {
+              path: "$Author",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+        ];
 
         const posts = await db.collection("Posts").aggregate(query).toArray();
 
@@ -114,27 +129,29 @@ const postResolvers = {
 
     commentPost: async (_, args, context) => {
       try {
-        const userInfo = await context.authenticate()
-        const { db } = context
-        const { postId, content } = args.input
+        const userInfo = await context.authenticate();
+        const { db } = context;
+        const { postId, content } = args.input;
 
-        await db.collection("Posts").updateOne({
-          _id : new ObjectId(postId)
-        }, {
-          $push: {
-            comments: {
-              content,
-              username: userInfo.username,
-              createdAt: new Date(),
-              updatedAt: new Date()
-            }
+        await db.collection("Posts").updateOne(
+          {
+            _id: new ObjectId(postId),
+          },
+          {
+            $push: {
+              comments: {
+                content,
+                username: userInfo.username,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              },
+            },
           }
-        })
+        );
 
-        return "Comment success"
-
+        return "Comment success";
       } catch (error) {
-        throw error
+        throw error;
       }
     },
 
@@ -145,24 +162,26 @@ const postResolvers = {
 
         const { postId } = args.input;
 
-        await db.collection("Posts").updateOne({
-          _id : new ObjectId(postId)
-        }, {
-          $push: {
-            likes: {
-              username: userInfo.username,
-              createdAt: new Date(),
-              updatedAt: new Date()
-            }
+        await db.collection("Posts").updateOne(
+          {
+            _id: new ObjectId(postId),
+          },
+          {
+            $push: {
+              likes: {
+                username: userInfo.username,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              },
+            },
           }
-        })
+        );
 
-        return "Like success"
-
+        return "Like success";
       } catch (error) {
-        throw error
+        throw error;
       }
-    }
+    },
   },
 };
 
