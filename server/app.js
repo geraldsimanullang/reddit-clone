@@ -6,7 +6,6 @@ const { ApolloServer } = require("@apollo/server");
 const { startStandaloneServer } = require("@apollo/server/standalone");
 const { GraphQLError } = require("graphql");
 
-const { responseTypeDefs } = require("./schemas/response");
 const { userTypeDefs, userResolvers } = require("./schemas/user-schema");
 const { postTypeDefs, postResolvers } = require("./schemas/post-schema");
 const { followTypeDefs, followResolvers } = require("./schemas/follow-schema");
@@ -14,7 +13,7 @@ const { followTypeDefs, followResolvers } = require("./schemas/follow-schema");
 const { connect, getDB } = require("./config/mongodb-connection");
 
 const server = new ApolloServer({
-  typeDefs: [responseTypeDefs, userTypeDefs, postTypeDefs, followTypeDefs],
+  typeDefs: [userTypeDefs, postTypeDefs, followTypeDefs],
   resolvers: [userResolvers, postResolvers, followResolvers],
 });
 

@@ -26,12 +26,16 @@ const userTypeDefs = `#graphql
     password: String!
   }
 
+  type LoginResponse {
+    access_token: String
+  }
+
   type Query {
     searchUsers(input: SearchUserInput): [User]
   }
 
   type Mutation {
-    register(input: RegisterInput): RegisterResponse
+    register(input: RegisterInput): String
     login(input: LoginInput) : LoginResponse
   }
 `;
@@ -121,10 +125,7 @@ const userResolvers = {
 
         await db.collection("Users").insertOne(registerInput);
 
-        return {
-          statusCode: 201,
-          message: "Register success",
-        };
+        return "Register success"
       } catch (error) {
         throw error
       }
