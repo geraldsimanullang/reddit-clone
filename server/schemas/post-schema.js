@@ -1,3 +1,4 @@
+const { GraphQLError } = require("graphql");
 const { ObjectId } = require("mongodb");
 
 const postTypeDefs = `#graphql
@@ -27,6 +28,10 @@ const postTypeDefs = `#graphql
     Author: User
   }
 
+  input GetPostByIdInput {
+    postId: String!
+  }
+
   input AddPostInput {
     content: String!
     imgUrl: String
@@ -44,6 +49,7 @@ const postTypeDefs = `#graphql
 
   type Query {
     getPosts: [Post]
+    getPostById(input: GetPostByIdInput): Post
   }
 
   type Mutation {
@@ -60,7 +66,7 @@ const postResolvers = {
       try {
         const { db } = context;
 
-        const query = [
+        const stages = [
           {
             $lookup: {
               from: "Users",
@@ -71,7 +77,7 @@ const postResolvers = {
           },
           {
             $project: {
-              "author.password": 0,
+              "Author.password": 0,
             },
           },
           {
@@ -87,9 +93,58 @@ const postResolvers = {
           },
         ];
 
-        const posts = await db.collection("Posts").aggregate(query).toArray();
+        const posts = await db.collection("Posts").aggregate(stages).toArray();
 
         return posts;
+      } catch (error) {
+        throw error;
+      }
+    },
+
+    getPostById: async (_, args, context) => {
+      try {
+        await context.authenticate();
+        const { db } = context;
+        const { postId } = args.input;
+
+        const stages = [
+          {
+            $match: {
+              _id: new ObjectId(postId),
+            },
+          },
+          {
+            $lookup: {
+              from: "Users",
+              localField: "authorId",
+              foreignField: "_id",
+              as: "Author",
+            },
+          },
+          {
+            $project: {
+              "Author.password": 0,
+            },
+          },
+          {
+            $unwind: {
+              path: "$Author",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+        ];
+
+        const post = await db.collection("Posts").aggregate(stages).next();
+
+        if (!post) {
+          throw new GraphQLError("Post not found", {
+            extensions: {
+              http: { status: 404 },
+            },
+          });
+        }
+
+        return post
       } catch (error) {
         throw error;
       }

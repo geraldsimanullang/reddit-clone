@@ -1,3 +1,4 @@
+const { ObjectId } = require("mongodb");
 const { hashPassword, comparePassword } = require("../helpers/bcryptjs");
 const { signToken } = require("../helpers/jsonwebtoken");
 const { GraphQLError } = require("graphql");
@@ -12,6 +13,19 @@ const userTypeDefs = `#graphql
 
   input SearchUserInput {
     keyword: String!
+  }
+
+  input GetUserByIdInput {
+    userId: String!
+  }
+
+  type GetUserByIdResponse {
+    _id: ID!
+    name: String
+    username: String!
+    email: String!
+    Followings: [User]
+    Followers: [User]
   }
 
   input RegisterInput {
@@ -32,6 +46,7 @@ const userTypeDefs = `#graphql
 
   type Query {
     searchUsers(input: SearchUserInput): [User]
+    getUserById(input: GetUserByIdInput): GetUserByIdResponse
   }
 
   type Mutation {
@@ -56,6 +71,70 @@ const userResolvers = {
         const users = await db.collection("Users").find(query).toArray();
 
         return users;
+      } catch (error) {
+        throw error;
+      }
+    },
+
+    getUserById: async (_, args, context) => {
+      try {
+        await context.authenticate();
+        const { db } = context;
+        const { userId } = args.input;
+
+        const stages = [
+          {
+            $match: {
+              _id: new ObjectId(userId)
+            }
+          },
+          {
+            $lookup: {
+              from: "Follows",
+              localField: "_id",
+              foreignField: "followerId",
+              as: "Followings"
+            }
+          },
+          {
+            $lookup: {
+              from: "Users",
+              localField: "Followings.followingId",
+              foreignField: "_id",
+              as: "Followings"
+            }
+          },
+          {
+            $lookup: {
+              from: "Follows",
+              localField: "_id",
+              foreignField: "followingId",
+              as: "Followers"
+            }
+          },
+          {
+            $lookup: {
+              from: "Users",
+              localField: "Followers.followerId",
+              foreignField: "_id",
+              as: "Followers"
+            }
+          },
+          {
+            $project: {
+              password: 0,
+              "Followings.password": 0,
+              "Followers.password": 0
+            }
+          }
+        ]
+
+        const user = await db.collection("Users").aggregate(stages).next()
+
+        console.log(user)
+
+        return user
+
       } catch (error) {
         throw error;
       }
@@ -125,9 +204,9 @@ const userResolvers = {
 
         await db.collection("Users").insertOne(registerInput);
 
-        return "Register success"
+        return "Register success";
       } catch (error) {
-        throw error
+        throw error;
       }
     },
 

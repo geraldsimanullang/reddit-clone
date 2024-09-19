@@ -10,7 +10,7 @@ const followTypeDefs = `#graphql
   }
 
   input FollowInput {
-    followingId: ID!
+    followingId: String
   }
 
   type Mutation {
@@ -27,7 +27,7 @@ const followResolvers = {
         const { db } = context;
 
         const followInput = {
-          followingId,
+          followingId: new ObjectId(followingId),
           followerId: new ObjectId(userInfo.userId),
           createdAt: new Date(),
           updatedAt: new Date(),
