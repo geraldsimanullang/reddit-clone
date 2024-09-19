@@ -133,7 +133,6 @@ const postResolvers = {
 
         return "Comment success"
 
-
       } catch (error) {
         throw error
       }
