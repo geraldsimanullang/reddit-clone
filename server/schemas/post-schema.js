@@ -1,5 +1,6 @@
 const { GraphQLError } = require("graphql");
 const { ObjectId } = require("mongodb");
+const redis = require("../config/redis-config");
 
 const postTypeDefs = `#graphql
   type Comment {
@@ -64,6 +65,14 @@ const postResolvers = {
   Query: {
     getPosts: async (_, __, context) => {
       try {
+        await context.authenticate();
+
+        const cache = await redis.get("posts");
+
+        if (cache) {
+          return JSON.parse(cache);
+        }
+
         const { db } = context;
 
         const stages = [
@@ -95,6 +104,7 @@ const postResolvers = {
 
         const posts = await db.collection("Posts").aggregate(stages).toArray();
 
+        redis.set("posts", posts);
         return posts;
       } catch (error) {
         throw error;
@@ -144,7 +154,7 @@ const postResolvers = {
           });
         }
 
-        return post
+        return post;
       } catch (error) {
         throw error;
       }
@@ -176,6 +186,7 @@ const postResolvers = {
           .collection("Posts")
           .findOne({ _id: addPostReport.insertedId });
 
+        redis.del("posts");
         return newPost;
       } catch (error) {
         throw error;
