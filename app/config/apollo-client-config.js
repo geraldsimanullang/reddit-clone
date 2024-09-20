@@ -7,7 +7,7 @@ const httpLink = createHttpLink({
 });
 
 const authLink = setContext(async (_, { headers }) => {
-  const access_token = await SecureStore.getItemAsync("token");
+  const access_token = await SecureStore.getItemAsync("access_token");
 
   return {
     headers: {
