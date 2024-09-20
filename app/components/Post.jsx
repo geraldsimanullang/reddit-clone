@@ -1,7 +1,20 @@
 import { StyleSheet, Text, View, Image } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 const Post = ({ post }) => {
+  const [imageAspectRatio, setImageAspectRatio] = useState(1);
+
+  useEffect(() => {
+    Image.getSize(
+      post.imgUrl,
+      (width, height) => {
+        setImageAspectRatio(width / height);
+      },
+      (error) => {
+        console.error("Failed to load image", error);
+      }
+    );
+  }, [post]);
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -14,13 +27,15 @@ const Post = ({ post }) => {
       </View>
       <View style={styles.body}>
         <Text style={styles.contentText}>{post.content}</Text>
-        <Image
-          style={styles.postImage}
-          source={{
-            uri: post.imgUrl,
-          }}
-          resizeMode="contain"
-        />
+        <View style={styles.imageContainer}>
+          <Image
+            style={[styles.postImage, { aspectRatio: imageAspectRatio }]}
+            source={{
+              uri: post.imgUrl,
+            }}
+            resizeMode="contain"
+          />
+        </View>
       </View>
     </View>
   );
@@ -39,7 +54,7 @@ const styles = StyleSheet.create({
   },
   header: {
     flex: 1,
-    gap: 5,
+    gap: 8,
     flexDirection: "row",
     alignItems: "center",
     width: "100%",
@@ -63,10 +78,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
   },
+  imageContainer: {
+    width: "100%",
+  },
   postImage: {
     width: "100%",
-    height: 200,
-    borderRadius: 20,
+    borderRadius: 15,
   },
 });
 
