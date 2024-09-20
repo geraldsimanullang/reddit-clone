@@ -35,7 +35,6 @@ const HomeScreen = ({ navigation }) => {
   }
 
   if (!loading && data) {
-    console.log(data);
     return (
       <SafeAreaView style={styles.container}>
         <Image
@@ -46,6 +45,7 @@ const HomeScreen = ({ navigation }) => {
           data={data.getPosts}
           renderItem={({ item }) => <Post post={item} />}
           keyExtractor={(item) => item._id}
+          style={{ paddingTop: 20 }}
         />
       </SafeAreaView>
     );
@@ -55,7 +55,7 @@ const HomeScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingLeft: 15,
+    paddingHorizontal: 15,
   },
   textLogo: {
     width: 80,
