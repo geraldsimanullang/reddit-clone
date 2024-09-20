@@ -15,6 +15,7 @@ const { connect, getDB } = require("./config/mongodb-connection");
 const server = new ApolloServer({
   typeDefs: [userTypeDefs, postTypeDefs, followTypeDefs],
   resolvers: [userResolvers, postResolvers, followResolvers],
+  introspection: true,
 });
 
 (async () => {

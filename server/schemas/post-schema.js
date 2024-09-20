@@ -104,7 +104,7 @@ const postResolvers = {
 
         const posts = await db.collection("Posts").aggregate(stages).toArray();
 
-        redis.set("posts", posts);
+        redis.set("posts", JSON.stringify(posts));
         return posts;
       } catch (error) {
         throw error;
