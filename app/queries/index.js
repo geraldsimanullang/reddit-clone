@@ -75,3 +75,14 @@ export const ADD_POST = gql`
     }
   }
 `;
+
+export const SEARCH_USERS = gql`
+  query SearchUsers($input: SearchUserInput) {
+    searchUsers(input: $input) {
+      _id
+      name
+      username
+      email
+    }
+  }
+`;

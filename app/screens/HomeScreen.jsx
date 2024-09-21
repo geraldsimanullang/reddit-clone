@@ -48,10 +48,19 @@ const HomeScreen = ({ navigation }) => {
   if (!loading && data) {
     return (
       <SafeAreaView style={styles.container}>
-        <Image
-          style={styles.textLogo}
-          source={require("../assets/Reddit_text.png")}
-        />
+        <View style={styles.header}>
+          <Image
+            style={styles.textLogo}
+            source={require("../assets/Reddit_text.png")}
+            resizeMethod="contain"
+          />
+          <Pressable onPress={() => navigation.navigate("SearchUsers")}>
+            <Image
+              style={styles.searchIcon}
+              source={require("../assets/Search_icon.png")}
+            />
+          </Pressable>
+        </View>
         <FlatList
           data={data.getPosts}
           renderItem={({ item }) => <Post post={item} />}
@@ -69,9 +78,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     backgroundColor: "white",
   },
+  header: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   textLogo: {
     width: 80,
     objectFit: "contain",
+  },
+  searchIcon: {
+    width: 35,
+    height: 35,
   },
 });
 

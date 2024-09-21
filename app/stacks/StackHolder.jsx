@@ -8,9 +8,11 @@ import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
 import HomeScreen from "../screens/HomeScreen";
 import AddPostScreen from "../screens/AddPostScreen";
+import SearchUsers from "../screens/SearchUsersScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
+const HomeStack = createNativeStackNavigator();
 
 const StackHolder = () => {
   const { isLoggedIn } = useContext(LoginContext);
@@ -31,10 +33,19 @@ const StackHolder = () => {
   );
 };
 
+const HomeStackScreen = () => {
+  return (
+    <HomeStack.Navigator screenOptions={{ headerShown: false }}>
+      <HomeStack.Screen name="HomeScreen" component={HomeScreen} />
+      <HomeStack.Screen name="SearchUsers" component={SearchUsers} />
+    </HomeStack.Navigator>
+  );
+};
+
 const MainTabs = () => {
   return (
     <Tab.Navigator screenOptions={{ headerShown: false }}>
-      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Home" component={HomeStackScreen} />
       <Tab.Screen name="Create" component={AddPostScreen} />
     </Tab.Navigator>
   );

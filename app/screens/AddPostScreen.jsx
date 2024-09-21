@@ -12,6 +12,10 @@ const AddPostScreen = ({ navigation }) => {
 
   const [addPostMutation, { loading, error, data }] = useMutation(ADD_POST, {
     onCompleted: async (res) => {
+      setContent("");
+      setImgUrl("");
+      setTagsString("");
+
       navigation.navigate("Home");
     },
     onError: (error) => {
