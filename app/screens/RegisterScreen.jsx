@@ -10,27 +10,20 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useState, useContext } from "react";
 
 import { useMutation } from "@apollo/client";
-import { LOGIN } from "../queries";
+import { REGISTER } from "../queries";
 import * as SecureStore from "expo-secure-store";
 
 import { LoginContext } from "../contexts/LoginContext";
 
-const LoginScreen = ({ navigation }) => {
-  const { setIsLoggedIn } = useContext(LoginContext);
-
+const RegisterScreen = ({ navigation }) => {
+  const [name, setName] = useState("");
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const [loginMutation, { loading, error, data }] = useMutation(LOGIN, {
+  const [registerMutation, { loading, error, data }] = useMutation(REGISTER, {
     onCompleted: async (res) => {
-      let access_token = null;
-
-      if (res && res.login && res.login.access_token) {
-        access_token = res.login.access_token;
-      }
-
-      await SecureStore.setItemAsync("access_token", access_token);
-      setIsLoggedIn(true);
+      navigation.navigate("Login");
     },
     onError: (error) => {
       console.error(error);
@@ -38,61 +31,57 @@ const LoginScreen = ({ navigation }) => {
   });
 
   const onPressContinue = async () => {
-    if (!username || !password) {
-      console.error("Email or password is required");
+    if (!name || !username || !email || !password) {
+      console.error("Name, username, email or password is required");
       return;
     }
 
     try {
-      await loginMutation({
+      await registerMutation({
         variables: {
           input: {
+            name,
             username,
+            email,
             password,
           },
         },
       });
     } catch (err) {
-      console.error("Error during login mutation:", err);
+      console.error("Error during register:", err);
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <View style={{ flex: 1 }} />
-        <Image
-          source={require("../assets/Reddit_icon.jpg")}
-          style={styles.logo}
-        />
-
-        <Pressable
-          style={{
-            flex: 1,
-            flexDirection: "row",
-            justifyContent: "flex-end",
-          }}
-          onPress={() => navigation.navigate("Register")}
-        >
-          <Text style={{ color: "gray", fontWeight: "bold", paddingRight: 5 }}>
-            Sign Up
-          </Text>
-        </Pressable>
-      </View>
-
+      <Image
+        source={require("../assets/Reddit_icon.jpg")}
+        style={styles.logo}
+      />
       <View style={{ flex: 2, width: "100%", paddingTop: 80 }}>
         <Text style={styles.headerText}>Enter your login information</Text>
         <TextInput
           style={styles.textInput}
+          value={name}
+          onChangeText={setName}
+          placeholder="Name"
+          placeholderTextColor="#999"
+          autoCapitalize="words"
+        />
+
+        <TextInput
+          style={styles.textInput}
           value={username}
           onChangeText={setUsername}
+          placeholder="Username"
+          placeholderTextColor="#999"
+          autoCapitalize="none"
+        />
+
+        <TextInput
+          style={styles.textInput}
+          value={email}
+          onChangeText={setEmail}
           placeholder="Username"
           placeholderTextColor="#999"
           autoCapitalize="none"
@@ -132,7 +121,6 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   logo: {
-    flex: 1,
     height: 40,
     width: 40,
     objectFit: "contain",
@@ -174,4 +162,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoginScreen;
+export default RegisterScreen;
