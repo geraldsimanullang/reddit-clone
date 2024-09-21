@@ -37,6 +37,54 @@ const Post = ({ post }) => {
           />
         </View>
       </View>
+      <View
+        style={{
+          flex: 1,
+          flexDirection: "row",
+          paddingRight: 240,
+          gap: 10,
+          paddingTop: 4,
+        }}
+      >
+        <View
+          style={{
+            flex: 1,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 6,
+            borderWidth: 1.5,
+            borderRadius: 10,
+            borderColor: "gray",
+            padding: 2,
+          }}
+        >
+          <Image
+            source={require("../assets/Upvote_icon.png")}
+            style={{ height: 15, width: 15 }}
+          />
+          <Text>|</Text>
+          <Text style={{ fontWeight: "bold" }}>{post.likes.length}</Text>
+        </View>
+        <View
+          style={{
+            flex: 1,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 6,
+            borderWidth: 1.5,
+            borderRadius: 10,
+            borderColor: "gray",
+          }}
+        >
+          <Image
+            source={require("../assets/Comment_icon.png")}
+            style={{ height: 13, width: 13 }}
+          />
+          <Text style={{ fontWeight: "bold" }}>{post.comments.length}</Text>
+        </View>
+      </View>
     </View>
   );
 };
