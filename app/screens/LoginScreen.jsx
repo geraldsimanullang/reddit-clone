@@ -141,7 +141,8 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: "#333",
-    marginBottom: 20,
+    marginBottom: 40,
+    textAlign: "center",
   },
   textInput: {
     width: "100%",

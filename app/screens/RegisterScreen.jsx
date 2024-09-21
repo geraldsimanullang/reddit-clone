@@ -7,13 +7,11 @@ import {
   Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState, useContext } from "react";
+
+import { useState } from "react";
 
 import { useMutation } from "@apollo/client";
 import { REGISTER } from "../queries";
-import * as SecureStore from "expo-secure-store";
-
-import { LoginContext } from "../contexts/LoginContext";
 
 const RegisterScreen = ({ navigation }) => {
   const [name, setName] = useState("");
@@ -54,12 +52,35 @@ const RegisterScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Image
-        source={require("../assets/Reddit_icon.jpg")}
-        style={styles.logo}
-      />
+      <View
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <View style={{ flex: 1 }} />
+        <Image
+          source={require("../assets/Reddit_icon.jpg")}
+          style={styles.logo}
+        />
+
+        <Pressable
+          style={{
+            flex: 1,
+            flexDirection: "row",
+            justifyContent: "flex-end",
+          }}
+          onPress={() => navigation.navigate("Login")}
+        >
+          <Text style={{ color: "gray", fontWeight: "bold", paddingRight: 5 }}>
+            Login
+          </Text>
+        </Pressable>
+      </View>
       <View style={{ flex: 2, width: "100%", paddingTop: 80 }}>
-        <Text style={styles.headerText}>Enter your login information</Text>
+        <Text style={styles.headerText}>Hi new friend, welcome to Reddit</Text>
         <TextInput
           style={styles.textInput}
           value={name}
@@ -82,7 +103,7 @@ const RegisterScreen = ({ navigation }) => {
           style={styles.textInput}
           value={email}
           onChangeText={setEmail}
-          placeholder="Username"
+          placeholder="Email"
           placeholderTextColor="#999"
           autoCapitalize="none"
         />
@@ -126,10 +147,11 @@ const styles = StyleSheet.create({
     objectFit: "contain",
   },
   headerText: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "bold",
     color: "#333",
     marginBottom: 20,
+    textAlign: "center",
   },
   textInput: {
     width: "100%",

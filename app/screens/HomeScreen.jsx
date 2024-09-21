@@ -10,7 +10,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import * as SecureStore from "expo-secure-store";
-import { useContext } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import { useContext, useCallback } from "react";
 import { LoginContext } from "../contexts/LoginContext";
 import { useQuery } from "@apollo/client";
 import { GET_POSTS } from "../queries";
@@ -18,11 +19,21 @@ import { GET_POSTS } from "../queries";
 import Post from "../components/Post";
 
 const HomeScreen = ({ navigation }) => {
-  const { loading, error, data } = useQuery(GET_POSTS);
+  const { loading, error, data, refetch } = useQuery(GET_POSTS);
   const { setIsLoggedIn } = useContext(LoginContext);
 
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
+
   if (loading) {
-    return <Text>loading...</Text>;
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text style={{ textAlign: "center" }}>loading...</Text>
+      </SafeAreaView>
+    );
   }
 
   if (!loading && error) {
