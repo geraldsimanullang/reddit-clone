@@ -147,7 +147,7 @@ const PostDetail = ({ route }) => {
       <FlatList
         data={data.getPostById.comments}
         renderItem={({ item }) => <Comment comment={item} />}
-        keyExtractor={(item) => item._id}
+        keyExtractor={(item) => item.createdAt}
         ListHeaderComponent={
           <>
             <View style={styles.header}>

@@ -3,12 +3,12 @@ import { setContext } from "@apollo/client/link/context";
 import * as SecureStore from "expo-secure-store";
 
 const httpLink = createHttpLink({
-  uri: "https://nw306qqp-4000.asse.devtunnels.ms/",
+  uri: "https://reddit-clone.geraldsimanullang.site",
 });
 
 const authLink = setContext(async (_, { headers }) => {
   const access_token = await SecureStore.getItemAsync("access_token");
-
+  ``;
   return {
     headers: {
       ...headers,
