@@ -76,9 +76,9 @@ Pada aplikasi ini kamu perlu membuat screen sebagai berikut:
 - [ ] Authenticate screen
   - [x] Home screen: Menampilkan list post
   - [x] Create Post: Menampilkan form untuk menambahkan post baru
-  - [ ] Post Detail Screen: Menampilkan post detail berdasarkan id dan form untuk komentar
+  - [x] Post Detail Screen: Menampilkan post detail berdasarkan id dan form untuk komentar
   - [x] Search Screen: Menampilkan form pencarian untuk mencari user (bisa digabung dengan screen lain)
-  - [ ] Profile Screen: Menampilkan profile user berdasarkan id, serta menampilkan jumlah followings dan followers user.
+  - [x] Profile Screen: Menampilkan profile user berdasarkan id, serta menampilkan jumlah followings dan followers user.
 
 ### React Navigation
 
@@ -96,6 +96,6 @@ Lakukan komunikasi Aplikasi Mobile (react-native) menggunakan apollo client ke s
 - [x] Add Post (Mutation)
 - [ ] Comment Post (Mutation)
 - [x] Search User (Query)
-- [ ] Follow (Mutation)
-- [ ] Get User (Query)
+- [x] Follow (Mutation)
+- [x] Get User (Query)
 - [ ] Like Post (Mutation)

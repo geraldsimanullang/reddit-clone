@@ -227,27 +227,49 @@ const postResolvers = {
       try {
         const userInfo = await context.authenticate();
         const { db } = context;
-
         const { postId } = args.input;
+        const username = userInfo.username;
 
-        await db.collection("Posts").updateOne(
-          {
-            _id: new ObjectId(postId),
-          },
-          {
-            $push: {
-              likes: {
-                username: userInfo.username,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-              },
-            },
-          }
+        // Find the post to check if the user already liked it
+        const post = await db
+          .collection("Posts")
+          .findOne({ _id: new ObjectId(postId) });
+
+        if (!post) {
+          throw new Error("Post not found");
+        }
+
+        const userLikeIndex = post.likes.findIndex(
+          (like) => like.username === username
         );
 
-        await redis.del("posts");
-
-        return "Like success";
+        if (userLikeIndex !== -1) {
+          // User already liked the post, so remove the like
+          await db
+            .collection("Posts")
+            .updateOne(
+              { _id: new ObjectId(postId) },
+              { $pull: { likes: { username } } }
+            );
+          await redis.del("posts");
+          return "Unlike success";
+        } else {
+          // User has not liked the post yet, so add the like
+          await db.collection("Posts").updateOne(
+            { _id: new ObjectId(postId) },
+            {
+              $push: {
+                likes: {
+                  username,
+                  createdAt: new Date(),
+                  updatedAt: new Date(),
+                },
+              },
+            }
+          );
+          await redis.del("posts");
+          return "Like success";
+        }
       } catch (error) {
         throw error;
       }

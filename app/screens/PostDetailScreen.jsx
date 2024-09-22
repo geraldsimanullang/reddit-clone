@@ -5,16 +5,18 @@ import {
   Text,
   TextInput,
   FlatList,
+  Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCallback, useEffect, useState } from "react";
-import { GET_POST_BY_ID } from "../queries";
-import { useQuery } from "@apollo/client";
+import { GET_POST_BY_ID, LIKE_OR_UNLIKE_POST } from "../queries";
+import { useMutation, useQuery } from "@apollo/client";
 import { useFocusEffect } from "@react-navigation/native";
 import Comment from "../components/Comment";
 
 const PostDetail = ({ route }) => {
   const postId = route?.params?.postId;
+  console.log("Post ID:", postId);
 
   const { loading, error, data, refetch } = useQuery(GET_POST_BY_ID, {
     variables: {
@@ -24,6 +26,35 @@ const PostDetail = ({ route }) => {
     },
     skip: !postId,
   });
+
+  const [
+    likeOrUnlikeMutation,
+    { loading: mutationLoading, error: mutationError, data: mutationData },
+  ] = useMutation(LIKE_OR_UNLIKE_POST, {
+    onCompleted: (res) => {
+      console.log("Mutation completed:", res);
+      refetch();
+    },
+    onError: (error) => {
+      console.log("Mutation error:", error);
+    },
+  });
+
+  const onPressLike = async () => {
+    try {
+      if (postId) {
+        await likeOrUnlikeMutation({
+          variables: {
+            input: {
+              postId,
+            },
+          },
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -54,69 +85,72 @@ const PostDetail = ({ route }) => {
   }
 
   if (error) {
+    console.error("Error loading post:", error);
     return <Text>Error loading post</Text>;
   }
 
-  if (data) {
-    return (
-      <SafeAreaView style={styles.container}>
-        {/* Reddit logo */}
-        <View
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "flex-start",
-          }}
-        >
-          <Image
-            style={styles.textLogo}
-            source={require("../assets/Reddit_text.png")}
-            resizeMode="contain"
-          />
-        </View>
-        <FlatList
-          data={data.getPostById.comments}
-          renderItem={({ item }) => <Comment comment={item} />}
-          keyExtractor={(item) => item._id}
-          ListHeaderComponent={
-            <>
-              {/* Header section */}
-              <View style={styles.header}>
-                <Image
-                  style={styles.avatar}
-                  source={require("../assets/User_avatar.png")}
-                  resizeMode="contain"
-                />
-                <Text style={styles.usernameText}>
-                  u/{data.getPostById.Author.username}
-                </Text>
-              </View>
+  if (!data || !data.getPostById) {
+    return <Text>No post data available</Text>;
+  }
 
-              {/* Body section */}
-              <View style={styles.body}>
-                <Text style={styles.contentText}>
-                  {data.getPostById.content}
-                </Text>
-                <Text style={styles.tags}>
-                  tags: <Text style={styles.boldText}>{tags}</Text>
-                </Text>
-                {data.getPostById.imgUrl && (
-                  <View style={styles.imageContainer}>
-                    <Image
-                      style={[
-                        styles.postImage,
-                        { aspectRatio: imageAspectRatio },
-                      ]}
-                      source={{
-                        uri: data.getPostById.imgUrl,
-                      }}
-                      resizeMode="contain"
-                    />
-                  </View>
-                )}
-              </View>
+  return (
+    <SafeAreaView style={styles.container}>
+      {/* Reddit logo */}
+      <View
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "flex-start",
+        }}
+      >
+        <Image
+          style={styles.textLogo}
+          source={require("../assets/Reddit_text.png")}
+          resizeMode="contain"
+        />
+      </View>
+      <FlatList
+        data={data.getPostById.comments}
+        renderItem={({ item }) => <Comment comment={item} />}
+        keyExtractor={(item) => item._id}
+        ListHeaderComponent={
+          <>
+            {/* Header section */}
+            <View style={styles.header}>
+              <Image
+                style={styles.avatar}
+                source={require("../assets/User_avatar.png")}
+                resizeMode="contain"
+              />
+              <Text style={styles.usernameText}>
+                u/{data.getPostById.Author.username}
+              </Text>
+            </View>
 
-              {/* Footer with upvotes and comments */}
+            {/* Body section */}
+            <View style={styles.body}>
+              <Text style={styles.contentText}>{data.getPostById.content}</Text>
+              <Text style={styles.tags}>
+                tags: <Text style={styles.boldText}>{tags}</Text>
+              </Text>
+              {data.getPostById.imgUrl && (
+                <View style={styles.imageContainer}>
+                  <Image
+                    style={[
+                      styles.postImage,
+                      { aspectRatio: imageAspectRatio },
+                    ]}
+                    source={{
+                      uri: data.getPostById.imgUrl,
+                    }}
+                    resizeMode="contain"
+                  />
+                </View>
+              )}
+            </View>
+
+            {/* Footer with upvotes and comments */}
+            <Pressable onPress={onPressLike}>
               <View style={styles.footer}>
                 <View style={styles.upvoteContainer}>
                   <Image
@@ -138,19 +172,19 @@ const PostDetail = ({ route }) => {
                   </Text>
                 </View>
               </View>
+            </Pressable>
 
-              {/* Comment input */}
-              <TextInput
-                placeholder="Add a comment"
-                style={styles.commentInput}
-              />
-            </>
-          }
-          ListFooterComponent={<View style={{ height: 100 }} />}
-        />
-      </SafeAreaView>
-    );
-  }
+            {/* Comment input */}
+            <TextInput
+              placeholder="Add a comment"
+              style={styles.commentInput}
+            />
+          </>
+        }
+        ListFooterComponent={<View style={{ height: 100 }} />}
+      />
+    </SafeAreaView>
+  );
 };
 
 const styles = StyleSheet.create({

@@ -76,6 +76,12 @@ export const GET_POST_BY_ID = gql`
   }
 `;
 
+export const LIKE_OR_UNLIKE_POST = gql`
+  mutation LikePost($input: LikeInput) {
+    likePost(input: $input)
+  }
+`;
+
 export const ADD_POST = gql`
   mutation AddPost($input: AddPostInput) {
     addPost(input: $input) {
