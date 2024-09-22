@@ -22,4 +22,4 @@ My Social Media App adalah sebuah aplikasi client(mobile)-server. Challenge ini 
 - [x] Fitur follow
 - [x] Menampilkan Followers dan Following dari setiap user (Reference with $lookup)
 - [x] Fitur Like Post
-- [ ] Menampilkan total like dari setiap post
+- [x] Menampilkan total like dari setiap post
