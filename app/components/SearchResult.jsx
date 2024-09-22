@@ -1,19 +1,25 @@
-import { StyleSheet, View, Text, Image } from "react-native";
+import { StyleSheet, View, Text, Image, Pressable } from "react-native";
 
-const SearchResult = ({ user }) => {
+const SearchResult = ({ user, navigation }) => {
   return (
     <View style={styles.container}>
-      <View>
-        <Image
-          source={require("../assets/User_avatar.png")}
-          style={{ width: 40, height: 40 }}
-          resizeMethod="contain"
-        />
-      </View>
-      <View>
-        <Text style={{ fontWeight: "bold" }}>{user.name}</Text>
-        <Text style={{ color: "gray" }}>u/{user.username}</Text>
-      </View>
+      <Pressable
+        onPress={() =>
+          navigation.navigate("ProfileScreen", { userId: user["_id"] })
+        }
+      >
+        <View>
+          <Image
+            source={require("../assets/User_avatar.png")}
+            style={{ width: 40, height: 40 }}
+            resizeMethod="contain"
+          />
+        </View>
+        <View>
+          <Text style={{ fontWeight: "bold" }}>{user.name}</Text>
+          <Text style={{ color: "gray" }}>u/{user.username}</Text>
+        </View>
+      </Pressable>
     </View>
   );
 };

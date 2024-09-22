@@ -49,7 +49,9 @@ const SearchUsers = ({ navigation }) => {
         <FlatList
           data={data.searchUsers}
           keyExtractor={(item) => item._id}
-          renderItem={({ item }) => <SearchResult user={item} />}
+          renderItem={({ item }) => (
+            <SearchResult user={item} navigation={navigation} />
+          )}
           contentContainerStyle={styles.list}
         />
       ) : (

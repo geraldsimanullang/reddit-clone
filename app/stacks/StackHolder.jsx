@@ -10,6 +10,7 @@ import HomeScreen from "../screens/HomeScreen";
 import AddPostScreen from "../screens/AddPostScreen";
 import SearchUsers from "../screens/SearchUsersScreen";
 import PostDetail from "../screens/PostDetailScreen";
+import ProfileScreen from "../screens/ProfileScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -40,6 +41,7 @@ const HomeStackScreen = () => {
       <HomeStack.Screen name="HomeScreen" component={HomeScreen} />
       <HomeStack.Screen name="SearchUsers" component={SearchUsers} />
       <HomeStack.Screen name="PostDetail" component={PostDetail} />
+      <HomeStack.Screen name="ProfileScreen" component={ProfileScreen} />
     </HomeStack.Navigator>
   );
 };

@@ -117,3 +117,26 @@ export const SEARCH_USERS = gql`
     }
   }
 `;
+
+export const GET_USER_BY_ID = gql`
+  query GetUserById($input: GetUserByIdInput) {
+    getUserById(input: $input) {
+      _id
+      name
+      username
+      email
+      Followings {
+        _id
+        name
+        username
+        email
+      }
+      Followers {
+        _id
+        name
+        username
+        email
+      }
+    }
+  }
+`;
