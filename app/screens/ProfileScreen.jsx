@@ -18,7 +18,6 @@ const ProfileScreen = ({ route }) => {
   const [storedUserId, setStoredUserId] = useState(null);
   const userId = route?.params?.userId;
 
-  // Fetch stored userId from SecureStore
   useEffect(() => {
     const fetchUserId = async () => {
       const id = await SecureStore.getItemAsync("userId");
@@ -91,7 +90,7 @@ const ProfileScreen = ({ route }) => {
           source={require("../assets/User_avatar.png")}
           style={styles.avatar}
         />
-        {/* Conditionally render follow button only if storedUserId is not the same as the profile userId */}
+
         {storedUserId !== userId && (
           <View style={styles.followContainer}>
             <Pressable style={styles.followButton} onPress={onPressFollow}>

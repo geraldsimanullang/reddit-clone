@@ -230,7 +230,6 @@ const postResolvers = {
         const { postId } = args.input;
         const username = userInfo.username;
 
-        // Find the post to check if the user already liked it
         const post = await db
           .collection("Posts")
           .findOne({ _id: new ObjectId(postId) });
@@ -244,7 +243,6 @@ const postResolvers = {
         );
 
         if (userLikeIndex !== -1) {
-          // User already liked the post, so remove the like
           await db
             .collection("Posts")
             .updateOne(
@@ -254,7 +252,6 @@ const postResolvers = {
           await redis.del("posts");
           return "Unlike success";
         } else {
-          // User has not liked the post yet, so add the like
           await db.collection("Posts").updateOne(
             { _id: new ObjectId(postId) },
             {

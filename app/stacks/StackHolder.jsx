@@ -64,7 +64,7 @@ const MainTabs = ({ navigation }) => {
     } catch (error) {
       console.error("Error retrieving value:", error);
     } finally {
-      setLoading(false); // Set loading to false when done
+      setLoading(false);
     }
   };
 
