@@ -140,3 +140,9 @@ export const GET_USER_BY_ID = gql`
     }
   }
 `;
+
+export const FOLLOW_OR_UNFOLLOW_USER = gql`
+  mutation FollowUser($input: FollowInput) {
+    followUser(input: $input)
+  }
+`;

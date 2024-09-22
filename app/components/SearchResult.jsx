@@ -2,12 +2,12 @@ import { StyleSheet, View, Text, Image, Pressable } from "react-native";
 
 const SearchResult = ({ user, navigation }) => {
   return (
-    <View style={styles.container}>
-      <Pressable
-        onPress={() =>
-          navigation.navigate("ProfileScreen", { userId: user["_id"] })
-        }
-      >
+    <Pressable
+      onPress={() =>
+        navigation.navigate("ProfileScreen", { userId: user["_id"] })
+      }
+    >
+      <View style={styles.container}>
         <View>
           <Image
             source={require("../assets/User_avatar.png")}
@@ -19,8 +19,8 @@ const SearchResult = ({ user, navigation }) => {
           <Text style={{ fontWeight: "bold" }}>{user.name}</Text>
           <Text style={{ color: "gray" }}>u/{user.username}</Text>
         </View>
-      </Pressable>
-    </View>
+      </View>
+    </Pressable>
   );
 };
 

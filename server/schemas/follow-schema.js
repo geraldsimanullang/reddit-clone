@@ -14,7 +14,7 @@ const followTypeDefs = `#graphql
   }
 
   type Mutation {
-    followUser(input: FollowInput): Follow
+    followUser(input: FollowInput): String
   }
 `;
 
@@ -26,23 +26,39 @@ const followResolvers = {
         const { followingId } = args.input;
         const { db } = context;
 
+        const followerId = new ObjectId(userInfo.userId);
         const followInput = {
           followingId: new ObjectId(followingId),
-          followerId: new ObjectId(userInfo.userId),
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          followerId,
         };
 
-        const followReport = await db
+        // Check if the user is already following
+        const existingFollow = await db
           .collection("Follows")
-          .insertOne(followInput);
+          .findOne(followInput);
 
-        const follow = await db
-          .collection("Follows")
-          .findOne({ _id: new ObjectId(followReport.insertedId) });
+        if (existingFollow) {
+          // If already following, unfollow (remove the record)
+          await db.collection("Follows").deleteOne(followInput);
+          return "Unfollow success";
+        } else {
+          // If not following, create a new follow record
+          const followData = {
+            ...followInput,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          };
 
-        return follow;
-        
+          const followReport = await db
+            .collection("Follows")
+            .insertOne(followData);
+
+          const follow = await db
+            .collection("Follows")
+            .findOne({ _id: new ObjectId(followReport.insertedId) });
+
+          return "Follow success";
+        }
       } catch (error) {
         throw error;
       }

@@ -6,8 +6,11 @@ import {
   Pressable,
   SafeAreaView,
 } from "react-native";
-import { useQuery } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import { GET_USER_BY_ID } from "../queries";
+import { FOLLOW_OR_UNFOLLOW_USER } from "../queries";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 
 const ProfileScreen = ({ route }) => {
   const userId = route?.params?.userId;
@@ -20,6 +23,39 @@ const ProfileScreen = ({ route }) => {
     },
     skip: !userId,
   });
+
+  const [
+    followOrUnfollowMutation,
+    { mutationLoading, mutationError, mutationData },
+  ] = useMutation(FOLLOW_OR_UNFOLLOW_USER, {
+    onCompleted: async (res) => {
+      refetch();
+      console.log(res);
+    },
+    onError: async (error) => {
+      console.log(error);
+    },
+  });
+
+  const onPressFollow = async () => {
+    try {
+      followOrUnfollowMutation({
+        variables: {
+          input: {
+            followingId: userId,
+          },
+        },
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
 
   if (loading) {
     return (
@@ -45,7 +81,7 @@ const ProfileScreen = ({ route }) => {
           style={styles.avatar}
         />
         <View style={styles.followContainer}>
-          <Pressable style={styles.followButton}>
+          <Pressable style={styles.followButton} onPress={onPressFollow}>
             <Text style={styles.followButtonText}>Follow</Text>
           </Pressable>
         </View>
