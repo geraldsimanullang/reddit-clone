@@ -1,8 +1,10 @@
-import { StyleSheet, Text, View, Image } from "react-native";
+import { StyleSheet, Text, View, Image, Pressable } from "react-native";
 import React, { useEffect, useState } from "react";
 
-const Post = ({ post }) => {
+const Post = ({ post, navigation }) => {
   const [imageAspectRatio, setImageAspectRatio] = useState(1);
+
+  const tags = post?.tags?.map((tag) => `#${tag}`).join(" ");
 
   useEffect(() => {
     Image.getSize(
@@ -14,78 +16,85 @@ const Post = ({ post }) => {
         console.error("Failed to load image", error);
       }
     );
-  }, [post]);
+  }, [post.imgUrl]);
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Image
-          style={styles.avatar}
-          source={require("../assets/User_avatar.png")}
-          resizeMode="contain"
-        />
-        <Text style={styles.usernameText}>u/{post.Author.username}</Text>
-      </View>
-      <View style={styles.body}>
-        <Text style={styles.contentText}>{post.content}</Text>
-        <View style={styles.imageContainer}>
+    <Pressable
+      onPress={() => navigation.navigate("PostDetail", { postId: post["_id"] })}
+    >
+      <View style={styles.container}>
+        <View style={styles.header}>
           <Image
-            style={[styles.postImage, { aspectRatio: imageAspectRatio }]}
-            source={{
-              uri: post.imgUrl,
-            }}
+            style={styles.avatar}
+            source={require("../assets/User_avatar.png")}
             resizeMode="contain"
           />
+          <Text style={styles.usernameText}>u/{post.Author.username}</Text>
         </View>
-      </View>
-      <View
-        style={{
-          flex: 1,
-          flexDirection: "row",
-          paddingRight: 240,
-          gap: 10,
-          paddingTop: 4,
-        }}
-      >
-        <View
-          style={{
-            flex: 1,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 6,
-            borderWidth: 1.5,
-            borderRadius: 10,
-            borderColor: "gray",
-            padding: 2,
-          }}
-        >
-          <Image
-            source={require("../assets/Upvote_icon.png")}
-            style={{ height: 15, width: 15 }}
-          />
-          <Text>|</Text>
-          <Text style={{ fontWeight: "bold" }}>{post.likes.length}</Text>
+        <View style={styles.body}>
+          <Text style={styles.contentText}>{post.content}</Text>
+          <Text style={{}}>
+            tags: <Text style={{ fontWeight: "bold" }}>{tags}</Text>
+          </Text>
+          <View style={styles.imageContainer}>
+            <Image
+              style={[styles.postImage, { aspectRatio: imageAspectRatio }]}
+              source={{
+                uri: post.imgUrl,
+              }}
+              resizeMode="contain"
+            />
+          </View>
         </View>
         <View
           style={{
             flex: 1,
             flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 6,
-            borderWidth: 1.5,
-            borderRadius: 10,
-            borderColor: "gray",
+            paddingRight: 240,
+            gap: 10,
+            paddingTop: 4,
           }}
         >
-          <Image
-            source={require("../assets/Comment_icon.png")}
-            style={{ height: 13, width: 13 }}
-          />
-          <Text style={{ fontWeight: "bold" }}>{post.comments.length}</Text>
+          <View
+            style={{
+              flex: 1,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 6,
+              borderWidth: 1.5,
+              borderRadius: 10,
+              borderColor: "gray",
+              padding: 2,
+            }}
+          >
+            <Image
+              source={require("../assets/Upvote_icon.png")}
+              style={{ height: 15, width: 15 }}
+            />
+            <Text>|</Text>
+            <Text style={{ fontWeight: "bold" }}>{post.likes.length}</Text>
+          </View>
+          <View
+            style={{
+              flex: 1,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 6,
+              borderWidth: 1.5,
+              borderRadius: 10,
+              borderColor: "gray",
+            }}
+          >
+            <Image
+              source={require("../assets/Comment_icon.png")}
+              style={{ height: 13, width: 13 }}
+            />
+            <Text style={{ fontWeight: "bold" }}>{post.comments.length}</Text>
+          </View>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 };
 

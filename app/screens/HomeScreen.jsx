@@ -63,7 +63,9 @@ const HomeScreen = ({ navigation }) => {
         </View>
         <FlatList
           data={data.getPosts}
-          renderItem={({ item }) => <Post post={item} />}
+          renderItem={({ item }) => (
+            <Post post={item} navigation={navigation} />
+          )}
           keyExtractor={(item) => item._id}
           style={{ paddingTop: 20 }}
         />

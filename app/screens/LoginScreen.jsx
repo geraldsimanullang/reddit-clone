@@ -43,6 +43,10 @@ const LoginScreen = ({ navigation }) => {
       return;
     }
 
+    const usernameWithoutSpace = username.replace(" ", "");
+
+    setUsername(usernameWithoutSpace);
+
     try {
       await loginMutation({
         variables: {

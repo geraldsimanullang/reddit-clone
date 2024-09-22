@@ -32,7 +32,7 @@ const AddPostScreen = ({ navigation }) => {
     let tags;
 
     if (tagsString.length > 0) {
-      tags = tagsString.replace(/\s/g, "");
+      tags = tagsString.replace(" ", "");
       tags = tagsString.split(",");
     }
 
