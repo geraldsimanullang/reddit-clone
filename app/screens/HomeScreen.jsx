@@ -28,6 +28,15 @@ const HomeScreen = ({ navigation }) => {
     }, [refetch])
   );
 
+  const onPressLogout = async () => {
+    try {
+      await SecureStore.deleteItemAsync("access_token");
+      setIsLoggedIn(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -54,17 +63,33 @@ const HomeScreen = ({ navigation }) => {
             source={require("../assets/Reddit_text.png")}
             resizeMethod="contain"
           />
-          <Pressable onPress={() => navigation.navigate("SearchUsers")}>
-            <Image
-              style={styles.searchIcon}
-              source={require("../assets/Search_icon.png")}
-            />
-          </Pressable>
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 20,
+            }}
+          >
+            <Pressable onPress={() => navigation.navigate("SearchUsers")}>
+              <Image
+                style={styles.searchIcon}
+                source={require("../assets/Search_icon.png")}
+              />
+            </Pressable>
+            <Pressable onPress={onPressLogout}>
+              <Image
+                style={{ width: 20, height: 20 }}
+                source={require("../assets/Logout_icon.png")}
+                resizeMethod="contain"
+              />
+            </Pressable>
+          </View>
         </View>
         <FlatList
           data={data.getPosts}
           renderItem={({ item }) => (
-            <Post post={item} navigation={navigation} />
+            <Post post={item} navigation={navigation} refetch={refetch} />
           )}
           keyExtractor={(item) => item._id}
           style={{ paddingTop: 20 }}

@@ -30,6 +30,15 @@ const LoginScreen = ({ navigation }) => {
       }
 
       await SecureStore.setItemAsync("access_token", access_token);
+
+      let userId = null;
+
+      if (res && res.login && res.login.userId) {
+        userId = res.login.userId;
+      }
+
+      await SecureStore.setItemAsync("userId", userId);
+
       setIsLoggedIn(true);
     },
     onError: (error) => {

@@ -1,7 +1,10 @@
 import { StyleSheet, Text, View, Image, Pressable } from "react-native";
 import React, { useEffect, useState } from "react";
 
-const Post = ({ post, navigation }) => {
+import { LIKE_OR_UNLIKE_POST } from "../queries";
+import { useMutation } from "@apollo/client";
+
+const Post = ({ post, navigation, refetch }) => {
   const [imageAspectRatio, setImageAspectRatio] = useState(1);
 
   const tags = post?.tags?.map((tag) => `#${tag}`).join(" ");
@@ -17,18 +20,60 @@ const Post = ({ post, navigation }) => {
       }
     );
   }, [post.imgUrl]);
+
+  const [
+    likeOrUnlikeMutation,
+    {
+      loading: likeOrUnlikeLoading,
+      error: likeOrUnlikeError,
+      data: likeOrUnlikeData,
+    },
+  ] = useMutation(LIKE_OR_UNLIKE_POST, {
+    onCompleted: (res) => {
+      refetch();
+    },
+    onError: (error) => {
+      console.log(error);
+    },
+  });
+
+  const onPressLike = async (postId) => {
+    try {
+      if (postId) {
+        await likeOrUnlikeMutation({
+          variables: {
+            input: {
+              postId,
+            },
+          },
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <Pressable
       onPress={() => navigation.navigate("PostDetail", { postId: post["_id"] })}
     >
       <View style={styles.container}>
         <View style={styles.header}>
-          <Image
-            style={styles.avatar}
-            source={require("../assets/User_avatar.png")}
-            resizeMode="contain"
-          />
-          <Text style={styles.usernameText}>u/{post.Author.username}</Text>
+          <Pressable
+            onPress={() =>
+              navigation.navigate("ProfileScreen", {
+                userId: post.Author["_id"],
+              })
+            }
+            style={styles.header}
+          >
+            <Image
+              style={styles.avatar}
+              source={require("../assets/User_avatar.png")}
+              resizeMode="contain"
+            />
+            <Text style={styles.usernameText}>u/{post.Author.username}</Text>
+          </Pressable>
         </View>
         <View style={styles.body}>
           <Text style={styles.contentText}>{post.content}</Text>
@@ -54,7 +99,7 @@ const Post = ({ post, navigation }) => {
             paddingTop: 4,
           }}
         >
-          <View
+          <Pressable
             style={{
               flex: 1,
               flexDirection: "row",
@@ -63,9 +108,11 @@ const Post = ({ post, navigation }) => {
               gap: 6,
               borderWidth: 1.5,
               borderRadius: 10,
+              height: 30,
               borderColor: "gray",
               padding: 2,
             }}
+            onPress={() => onPressLike(post._id)}
           >
             <Image
               source={require("../assets/Upvote_icon.png")}
@@ -73,7 +120,7 @@ const Post = ({ post, navigation }) => {
             />
             <Text>|</Text>
             <Text style={{ fontWeight: "bold" }}>{post.likes.length}</Text>
-          </View>
+          </Pressable>
           <View
             style={{
               flex: 1,
@@ -104,7 +151,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "start",
     gap: 8,
-    marginBottom: 10,
+    marginBottom: 20,
     borderBottomWidth: 0.2,
     borderBottomColor: "gray",
     paddingBottom: 10,
@@ -121,6 +168,7 @@ const styles = StyleSheet.create({
     height: 30,
     width: 30,
     margin: 0,
+    borderRadius: 15,
   },
   usernameText: {
     fontWeight: "bold",

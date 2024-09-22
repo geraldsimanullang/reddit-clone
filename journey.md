@@ -73,7 +73,7 @@ Pada aplikasi ini kamu perlu membuat screen sebagai berikut:
   - [x] Login Screen: Menampilkan form untuk login
   - [x] Register Screen: Menampilkan form untuk register
 
-- [ ] Authenticate screen
+- [x] Authenticate screen
   - [x] Home screen: Menampilkan list post
   - [x] Create Post: Menampilkan form untuk menambahkan post baru
   - [x] Post Detail Screen: Menampilkan post detail berdasarkan id dan form untuk komentar
@@ -94,8 +94,8 @@ Lakukan komunikasi Aplikasi Mobile (react-native) menggunakan apollo client ke s
 - [x] Login (Mutation)
 - [x] Get Post (Query)
 - [x] Add Post (Mutation)
-- [ ] Comment Post (Mutation)
+- [x] Comment Post (Mutation)
 - [x] Search User (Query)
 - [x] Follow (Mutation)
 - [x] Get User (Query)
-- [ ] Like Post (Mutation)
+- [x] Like Post (Mutation)

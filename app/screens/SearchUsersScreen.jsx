@@ -55,6 +55,7 @@ const SearchUsers = ({ navigation }) => {
           contentContainerStyle={styles.list}
         />
       ) : (
+        searchTerm.length > 0 &&
         !loading && <Text style={{ color: "gray" }}>No results found</Text>
       )}
 

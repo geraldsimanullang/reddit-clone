@@ -4,6 +4,7 @@ export const LOGIN = gql`
   mutation Login($input: LoginInput) {
     login(input: $input) {
       access_token
+      userId
     }
   }
 `;
@@ -79,6 +80,12 @@ export const GET_POST_BY_ID = gql`
 export const LIKE_OR_UNLIKE_POST = gql`
   mutation LikePost($input: LikeInput) {
     likePost(input: $input)
+  }
+`;
+
+export const COMMENT_POST = gql`
+  mutation CommentPost($input: CommentInput) {
+    commentPost(input: $input)
   }
 `;
 

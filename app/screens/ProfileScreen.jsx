@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -6,6 +7,7 @@ import {
   Pressable,
   SafeAreaView,
 } from "react-native";
+import * as SecureStore from "expo-secure-store";
 import { useMutation, useQuery } from "@apollo/client";
 import { GET_USER_BY_ID } from "../queries";
 import { FOLLOW_OR_UNFOLLOW_USER } from "../queries";
@@ -13,7 +15,17 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 
 const ProfileScreen = ({ route }) => {
+  const [storedUserId, setStoredUserId] = useState(null);
   const userId = route?.params?.userId;
+
+  // Fetch stored userId from SecureStore
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const id = await SecureStore.getItemAsync("userId");
+      setStoredUserId(id);
+    };
+    fetchUserId();
+  }, []);
 
   const { loading, error, data, refetch } = useQuery(GET_USER_BY_ID, {
     variables: {
@@ -30,7 +42,6 @@ const ProfileScreen = ({ route }) => {
   ] = useMutation(FOLLOW_OR_UNFOLLOW_USER, {
     onCompleted: async (res) => {
       refetch();
-      console.log(res);
     },
     onError: async (error) => {
       console.log(error);
@@ -80,11 +91,14 @@ const ProfileScreen = ({ route }) => {
           source={require("../assets/User_avatar.png")}
           style={styles.avatar}
         />
-        <View style={styles.followContainer}>
-          <Pressable style={styles.followButton} onPress={onPressFollow}>
-            <Text style={styles.followButtonText}>Follow</Text>
-          </Pressable>
-        </View>
+        {/* Conditionally render follow button only if storedUserId is not the same as the profile userId */}
+        {storedUserId !== userId && (
+          <View style={styles.followContainer}>
+            <Pressable style={styles.followButton} onPress={onPressFollow}>
+              <Text style={styles.followButtonText}>Follow</Text>
+            </Pressable>
+          </View>
+        )}
         <Text style={styles.name}>{data.getUserById.name}</Text>
         <Text style={styles.username}>u/{data.getUserById.username}</Text>
         <View style={styles.statsContainer}>
@@ -106,6 +120,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    marginTop: 20,
     alignItems: "center",
   },
   centered: {

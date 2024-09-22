@@ -9,14 +9,15 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCallback, useEffect, useState } from "react";
-import { GET_POST_BY_ID, LIKE_OR_UNLIKE_POST } from "../queries";
+import { COMMENT_POST, GET_POST_BY_ID, LIKE_OR_UNLIKE_POST } from "../queries";
 import { useMutation, useQuery } from "@apollo/client";
 import { useFocusEffect } from "@react-navigation/native";
 import Comment from "../components/Comment";
 
 const PostDetail = ({ route }) => {
+  const [content, setContent] = useState("");
+
   const postId = route?.params?.postId;
-  console.log("Post ID:", postId);
 
   const { loading, error, data, refetch } = useQuery(GET_POST_BY_ID, {
     variables: {
@@ -29,14 +30,17 @@ const PostDetail = ({ route }) => {
 
   const [
     likeOrUnlikeMutation,
-    { loading: mutationLoading, error: mutationError, data: mutationData },
+    {
+      loading: likeOrUnlikeLoading,
+      error: likeOrUnlikeError,
+      data: likeOrUnlikeData,
+    },
   ] = useMutation(LIKE_OR_UNLIKE_POST, {
     onCompleted: (res) => {
-      console.log("Mutation completed:", res);
       refetch();
     },
     onError: (error) => {
-      console.log("Mutation error:", error);
+      console.log(error);
     },
   });
 
@@ -51,6 +55,34 @@ const PostDetail = ({ route }) => {
           },
         });
       }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const [
+    commentMutation,
+    { loading: commentLoading, error: commentError, data: commentData },
+  ] = useMutation(COMMENT_POST, {
+    onCompleted: async (res) => {
+      setContent("");
+      refetch();
+    },
+    onError: async (error) => {
+      console.log(error);
+    },
+  });
+
+  const onPressComment = async () => {
+    try {
+      await commentMutation({
+        variables: {
+          input: {
+            content,
+            postId,
+          },
+        },
+      });
     } catch (error) {
       console.log(error);
     }
@@ -81,7 +113,11 @@ const PostDetail = ({ route }) => {
   }, [data?.getPostById?.imgUrl]);
 
   if (loading) {
-    return <Text>Loading...</Text>;
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text>Loading post...</Text>
+      </SafeAreaView>
+    );
   }
 
   if (error) {
@@ -95,7 +131,6 @@ const PostDetail = ({ route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Reddit logo */}
       <View
         style={{
           display: "flex",
@@ -115,8 +150,7 @@ const PostDetail = ({ route }) => {
         keyExtractor={(item) => item._id}
         ListHeaderComponent={
           <>
-            {/* Header section */}
-            <View style={styles.header}>
+            <View style={styles.header} key="header">
               <Image
                 style={styles.avatar}
                 source={require("../assets/User_avatar.png")}
@@ -127,8 +161,7 @@ const PostDetail = ({ route }) => {
               </Text>
             </View>
 
-            {/* Body section */}
-            <View style={styles.body}>
+            <View style={styles.body} key="body">
               <Text style={styles.contentText}>{data.getPostById.content}</Text>
               <Text style={styles.tags}>
                 tags: <Text style={styles.boldText}>{tags}</Text>
@@ -149,9 +182,8 @@ const PostDetail = ({ route }) => {
               )}
             </View>
 
-            {/* Footer with upvotes and comments */}
-            <Pressable onPress={onPressLike}>
-              <View style={styles.footer}>
+            <View style={styles.footer} key="footer">
+              <Pressable onPress={onPressLike}>
                 <View style={styles.upvoteContainer}>
                   <Image
                     source={require("../assets/Upvote_icon.png")}
@@ -162,23 +194,28 @@ const PostDetail = ({ route }) => {
                     {data.getPostById.likes.length}
                   </Text>
                 </View>
-                <View style={styles.commentContainer}>
-                  <Image
-                    source={require("../assets/Comment_icon.png")}
-                    style={styles.icon}
-                  />
-                  <Text style={styles.boldText}>
-                    {data.getPostById.comments.length}
-                  </Text>
-                </View>
+              </Pressable>
+              <View style={styles.commentContainer}>
+                <Image
+                  source={require("../assets/Comment_icon.png")}
+                  style={styles.icon}
+                />
+                <Text style={styles.boldText}>
+                  {data.getPostById.comments.length}
+                </Text>
               </View>
-            </Pressable>
+            </View>
 
-            {/* Comment input */}
             <TextInput
               placeholder="Add a comment"
               style={styles.commentInput}
+              value={content}
+              onChangeText={setContent}
             />
+
+            <Pressable onPress={onPressComment} style={styles.commentButton}>
+              <Text style={styles.commentButtonText}>Comment</Text>
+            </Pressable>
           </>
         }
         ListFooterComponent={<View style={{ height: 100 }} />}
@@ -267,7 +304,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     padding: 8,
-    marginBottom: 16,
+    marginBottom: 10,
+  },
+  commentButton: {
+    backgroundColor: "#ed4635",
+    padding: 10,
+    borderRadius: 5,
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  commentButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "bold",
   },
 });
 

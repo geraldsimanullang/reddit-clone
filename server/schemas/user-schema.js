@@ -41,7 +41,8 @@ const userTypeDefs = `#graphql
   }
 
   type LoginResponse {
-    access_token: String
+    access_token: String!
+    userId: String
   }
 
   type Query {
@@ -85,56 +86,55 @@ const userResolvers = {
         const stages = [
           {
             $match: {
-              _id: new ObjectId(userId)
-            }
+              _id: new ObjectId(userId),
+            },
           },
           {
             $lookup: {
               from: "Follows",
               localField: "_id",
               foreignField: "followerId",
-              as: "Followings"
-            }
+              as: "Followings",
+            },
           },
           {
             $lookup: {
               from: "Users",
               localField: "Followings.followingId",
               foreignField: "_id",
-              as: "Followings"
-            }
+              as: "Followings",
+            },
           },
           {
             $lookup: {
               from: "Follows",
               localField: "_id",
               foreignField: "followingId",
-              as: "Followers"
-            }
+              as: "Followers",
+            },
           },
           {
             $lookup: {
               from: "Users",
               localField: "Followers.followerId",
               foreignField: "_id",
-              as: "Followers"
-            }
+              as: "Followers",
+            },
           },
           {
             $project: {
               password: 0,
               "Followings.password": 0,
-              "Followers.password": 0
-            }
-          }
-        ]
+              "Followers.password": 0,
+            },
+          },
+        ];
 
-        const user = await db.collection("Users").aggregate(stages).next()
+        const user = await db.collection("Users").aggregate(stages).next();
 
-        console.log(user)
+        console.log(user);
 
-        return user
-
+        return user;
       } catch (error) {
         throw error;
       }
@@ -243,9 +243,8 @@ const userResolvers = {
         const access_token = signToken(payload);
 
         return {
-          statusCode: 200,
-          message: "Login Success",
           access_token,
+          userId: payload.userId,
         };
       } catch (error) {
         throw error;
