@@ -4,24 +4,237 @@ import {
   Image,
   Text,
   TextInput,
-  Pressable,
+  FlatList,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { GET_POST_BY_ID } from "../queries";
+import { useQuery } from "@apollo/client";
+import { useFocusEffect } from "@react-navigation/native";
+import Comment from "../components/Comment";
 
 const PostDetail = ({ route }) => {
   const postId = route?.params?.postId;
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <Text>{postId}</Text>
-    </SafeAreaView>
+  const { loading, error, data, refetch } = useQuery(GET_POST_BY_ID, {
+    variables: {
+      input: {
+        postId,
+      },
+    },
+    skip: !postId,
+  });
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
   );
+
+  const tags = data?.getPostById?.tags?.map((tag) => `#${tag}`).join(" ");
+
+  const [imageAspectRatio, setImageAspectRatio] = useState(1);
+
+  useEffect(() => {
+    if (data?.getPostById?.imgUrl) {
+      Image.getSize(
+        data.getPostById.imgUrl,
+        (width, height) => {
+          setImageAspectRatio(width / height);
+        },
+        (error) => {
+          console.error("Failed to load image", error);
+        }
+      );
+    }
+  }, [data?.getPostById?.imgUrl]);
+
+  if (loading) {
+    return <Text>Loading...</Text>;
+  }
+
+  if (error) {
+    return <Text>Error loading post</Text>;
+  }
+
+  if (data) {
+    return (
+      <SafeAreaView style={styles.container}>
+        {/* Reddit logo */}
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "flex-start",
+          }}
+        >
+          <Image
+            style={styles.textLogo}
+            source={require("../assets/Reddit_text.png")}
+            resizeMode="contain"
+          />
+        </View>
+        <FlatList
+          data={data.getPostById.comments}
+          renderItem={({ item }) => <Comment comment={item} />}
+          keyExtractor={(item) => item._id}
+          ListHeaderComponent={
+            <>
+              {/* Header section */}
+              <View style={styles.header}>
+                <Image
+                  style={styles.avatar}
+                  source={require("../assets/User_avatar.png")}
+                  resizeMode="contain"
+                />
+                <Text style={styles.usernameText}>
+                  u/{data.getPostById.Author.username}
+                </Text>
+              </View>
+
+              {/* Body section */}
+              <View style={styles.body}>
+                <Text style={styles.contentText}>
+                  {data.getPostById.content}
+                </Text>
+                <Text style={styles.tags}>
+                  tags: <Text style={styles.boldText}>{tags}</Text>
+                </Text>
+                {data.getPostById.imgUrl && (
+                  <View style={styles.imageContainer}>
+                    <Image
+                      style={[
+                        styles.postImage,
+                        { aspectRatio: imageAspectRatio },
+                      ]}
+                      source={{
+                        uri: data.getPostById.imgUrl,
+                      }}
+                      resizeMode="contain"
+                    />
+                  </View>
+                )}
+              </View>
+
+              {/* Footer with upvotes and comments */}
+              <View style={styles.footer}>
+                <View style={styles.upvoteContainer}>
+                  <Image
+                    source={require("../assets/Upvote_icon.png")}
+                    style={styles.icon}
+                  />
+                  <Text>|</Text>
+                  <Text style={styles.boldText}>
+                    {data.getPostById.likes.length}
+                  </Text>
+                </View>
+                <View style={styles.commentContainer}>
+                  <Image
+                    source={require("../assets/Comment_icon.png")}
+                    style={styles.icon}
+                  />
+                  <Text style={styles.boldText}>
+                    {data.getPostById.comments.length}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Comment input */}
+              <TextInput
+                placeholder="Add a comment"
+                style={styles.commentInput}
+              />
+            </>
+          }
+          ListFooterComponent={<View style={{ height: 100 }} />}
+        />
+      </SafeAreaView>
+    );
+  }
 };
 
 const styles = StyleSheet.create({
-  container: {},
+  container: {
+    flex: 1,
+    paddingHorizontal: 16,
+    backgroundColor: "#fff",
+  },
+  textLogo: {
+    width: 80,
+    marginBottom: 16,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  avatar: {
+    height: 30,
+    width: 30,
+    borderRadius: 20,
+  },
+  usernameText: {
+    fontWeight: "bold",
+    fontSize: 16,
+    marginLeft: 8,
+  },
+  body: {
+    flexDirection: "column",
+    marginBottom: 16,
+  },
+  contentText: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 8,
+  },
+  tags: {
+    marginBottom: 8,
+  },
+  boldText: {
+    fontWeight: "bold",
+  },
+  imageContainer: {
+    width: "100%",
+    marginVertical: 16,
+  },
+  postImage: {
+    width: "100%",
+    borderRadius: 10,
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  upvoteContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 8,
+    borderWidth: 1.5,
+    borderColor: "gray",
+    borderRadius: 8,
+    gap: 3,
+  },
+  commentContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 8,
+    borderWidth: 1.5,
+    borderColor: "gray",
+    borderRadius: 8,
+    gap: 3,
+  },
+  icon: {
+    height: 15,
+    width: 15,
+  },
+  commentInput: {
+    borderColor: "gray",
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 8,
+    marginBottom: 16,
+  },
 });
 
 export default PostDetail;
