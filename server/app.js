@@ -23,7 +23,7 @@ const server = new ApolloServer({
   const db = await getDB();
 
   const { url } = await startStandaloneServer(server, {
-    listen: process.env.APOLLO_PORT,
+    listen: process.env.PORT,
 
     context: async ({ req, res }) => {
       return {
@@ -35,10 +35,10 @@ const server = new ApolloServer({
               throw new GraphQLError("Unauthenticated");
             }
 
-            const access_token = authorization.split(" ")[1]
+            const access_token = authorization.split(" ")[1];
 
             if (!access_token) {
-              throw new GraphQLError("Invalid Token")
+              throw new GraphQLError("Invalid Token");
             }
 
             const { verifyToken } = require("./helpers/jsonwebtoken");
@@ -47,21 +47,20 @@ const server = new ApolloServer({
             const { ObjectId } = require("mongodb");
             const _id = new ObjectId(payload.userId);
 
-            const user = await db.collection("Users").findOne({_id})
+            const user = await db.collection("Users").findOne({ _id });
 
             if (!user) {
-              throw new GraphQLError("Unauthenticated")
+              throw new GraphQLError("Unauthenticated");
             }
 
             return {
               userId: user["_id"],
               name: user.name,
               username: user.username,
-              email: user.email
-            }
-
+              email: user.email,
+            };
           } catch (error) {
-            throw error
+            throw error;
           }
         },
         db,
