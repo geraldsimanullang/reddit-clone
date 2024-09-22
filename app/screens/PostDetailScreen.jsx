@@ -150,7 +150,7 @@ const PostDetail = ({ route }) => {
         keyExtractor={(item) => item._id}
         ListHeaderComponent={
           <>
-            <View style={styles.header} key="header">
+            <View style={styles.header}>
               <Image
                 style={styles.avatar}
                 source={require("../assets/User_avatar.png")}
@@ -161,7 +161,7 @@ const PostDetail = ({ route }) => {
               </Text>
             </View>
 
-            <View style={styles.body} key="body">
+            <View style={styles.body}>
               <Text style={styles.contentText}>{data.getPostById.content}</Text>
               <Text style={styles.tags}>
                 tags: <Text style={styles.boldText}>{tags}</Text>
@@ -182,7 +182,7 @@ const PostDetail = ({ route }) => {
               )}
             </View>
 
-            <View style={styles.footer} key="footer">
+            <View style={styles.footer}>
               <Pressable onPress={onPressLike}>
                 <View style={styles.upvoteContainer}>
                   <Image
